@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, Region, InterestArea } from '../types';
-import { Save, CheckCircle } from 'lucide-react';
+import { Save, CheckCircle, Hash } from 'lucide-react';
 
 interface Props {
   initialData?: UserProfile | null;
@@ -10,7 +10,8 @@ interface Props {
 
 export const ProfileForm: React.FC<Props> = ({ initialData, onSave, isInitialSetup = false }) => {
   const [formData, setFormData] = useState<Partial<UserProfile>>(initialData || {
-    interests: []
+    interests: [],
+    age: 6
   });
 
   const handleInterestToggle = (interest: InterestArea) => {
@@ -23,10 +24,10 @@ export const ProfileForm: React.FC<Props> = ({ initialData, onSave, isInitialSet
   };
 
   const handleSubmit = () => {
-    if (formData.ageGroup && formData.ambulatoryStatus && formData.region) {
+    if (formData.age !== undefined && formData.ambulatoryStatus && formData.region) {
         onSave({
             isConfigured: true,
-            ageGroup: formData.ageGroup,
+            age: Number(formData.age),
             geneticProfile: formData.geneticProfile || "未填写",
             ambulatoryStatus: formData.ambulatoryStatus,
             onSteroids: formData.onSteroids || "unsure",
@@ -53,27 +54,23 @@ export const ProfileForm: React.FC<Props> = ({ initialData, onSave, isInitialSet
                     <span className="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs mr-2">1</span>
                     基本信息
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">患者年龄组</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {['child', 'adult'].map((val) => (
-                                <button
-                                    key={val}
-                                    onClick={() => setFormData({...formData, ageGroup: val as any})}
-                                    className={`py-2 px-3 rounded text-sm transition-colors ${
-                                        formData.ageGroup === val 
-                                        ? 'bg-brand-600 text-white shadow-md' 
-                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
-                                    }`}
-                                >
-                                    {val === 'child' ? '儿童 (Child)' : '成人 (Adult)'}
-                                </button>
-                            ))}
+                        <label className="block text-sm font-medium text-gray-700 mb-1">患者年龄</label>
+                        <div className="relative flex items-center">
+                            <input 
+                                type="number" 
+                                min="0" 
+                                max="100"
+                                className="w-full border-gray-300 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 pr-10 border bg-white"
+                                value={formData.age || ''}
+                                onChange={(e) => setFormData({...formData, age: Number(e.target.value)})}
+                            />
+                            <span className="absolute right-3 text-gray-400 font-medium pointer-events-none">岁</span>
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">所在地区 (用于临床试验匹配)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">所在地区</label>
                         <select 
                             className="w-full border-gray-300 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border bg-white"
                             value={formData.region || ''}
@@ -172,7 +169,7 @@ export const ProfileForm: React.FC<Props> = ({ initialData, onSave, isInitialSet
 
             <button 
                 onClick={handleSubmit}
-                disabled={!formData.ageGroup || !formData.ambulatoryStatus || !formData.region}
+                disabled={formData.age === undefined || !formData.ambulatoryStatus || !formData.region}
                 className="w-full flex items-center justify-center py-4 bg-brand-600 text-white rounded-xl font-bold text-lg hover:bg-brand-700 disabled:opacity-50 shadow-lg shadow-brand-500/30 transition-all mt-4"
             >
                 <Save className="w-5 h-5 mr-2" />

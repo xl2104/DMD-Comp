@@ -2,6 +2,8 @@ export enum Region {
   ASIA = '亚洲 (Asia)',
   NORTH_AMERICA = '北美 (North America)',
   EUROPE = '欧洲 (Europe)',
+  OCEANIA = '大洋洲 (Oceania)',
+  SOUTH_AMERICA = '南美 (South America)',
   OTHER = '其他 (Other)'
 }
 
@@ -23,7 +25,7 @@ export enum ArticleType {
 
 export interface UserProfile {
   isConfigured: boolean;
-  ageGroup: 'child' | 'adult';
+  age: number;
   geneticProfile: string;
   ambulatoryStatus: 'ambulatory' | 'wheelchair' | 'mixed';
   onSteroids: 'yes' | 'no' | 'unsure';
@@ -41,6 +43,32 @@ export interface Article {
   journal: string;
   url: string;
   tags: ArticleType[];
+}
+
+export interface ClinicalTrial {
+  nctId: string;
+  title: string;
+  status: string;
+  phase: string[];
+  conditions: string[];
+  locations: string[];
+  regions: string[];
+  summary: string;
+  eligibility: string;
+  lastUpdate: string;
+}
+
+export interface FDADrug {
+  brandName: string;
+  brandNameCn?: string;
+  genericName: string;
+  genericNameCn?: string;
+  manufacturer: string;
+  approvalDate: string;
+  approvalYear: string;
+  indication: string;
+  dosage: string;
+  labelUrl: string;
 }
 
 export interface ChatMessage {
