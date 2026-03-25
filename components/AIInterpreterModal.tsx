@@ -50,7 +50,8 @@ export const AIInterpreterModal: React.FC<Props> = ({ article, profile, onClose 
     setInput('');
     setChatLoading(true);
 
-    const responseText = await chatWithArticle(chatHistory, userMsg.text, article, profile);
+    const context = `文章标题: ${article.title}\n摘要: ${article.abstract}`;
+    const responseText = await chatWithArticle(chatHistory, userMsg.text, context, profile);
     
     const botMsg: ChatMessage = { role: 'model', text: responseText };
     setChatHistory(prev => [...prev, botMsg]);

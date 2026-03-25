@@ -28,7 +28,9 @@ export const login = async (username: string, password: string): Promise<boolean
       const initialData: UserDatabaseEntry = {
         username: user.username,
         profile: null,
-        savedInquiries: []
+        savedInquiries: [],
+        rehabRecords: [],
+        rehabStatusHistory: []
       };
       localStorage.setItem(DB_PREFIX + user.username, JSON.stringify(initialData));
     }
@@ -62,6 +64,32 @@ export const saveUserProfile = async (profile: UserProfile): Promise<void> => {
     data.profile = profile;
     localStorage.setItem(DB_PREFIX + username, JSON.stringify(data));
     // In real app: await api.saveProfile(profile);
+  }
+};
+
+export const saveRehabRecord = async (record: Omit<import('../types').RehabRecord, 'id'>): Promise<void> => {
+  await delay(200);
+  const username = getCurrentUser();
+  if (!username) return;
+  const data = getUserData();
+  if (data) {
+    const newRecord = { ...record, id: crypto.randomUUID() };
+    if (!data.rehabRecords) data.rehabRecords = [];
+    data.rehabRecords.unshift(newRecord as any);
+    localStorage.setItem(DB_PREFIX + username, JSON.stringify(data));
+  }
+};
+
+export const saveRehabStatus = async (status: Omit<import('../types').RehabStatus, 'id'>): Promise<void> => {
+  await delay(200);
+  const username = getCurrentUser();
+  if (!username) return;
+  const data = getUserData();
+  if (data) {
+    const newStatus = { ...status, id: crypto.randomUUID() };
+    if (!data.rehabStatusHistory) data.rehabStatusHistory = [];
+    data.rehabStatusHistory.unshift(newStatus as any);
+    localStorage.setItem(DB_PREFIX + username, JSON.stringify(data));
   }
 };
 

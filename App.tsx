@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { Login } from './components/Login';
 import { ProfileForm } from './components/ProfileForm';
 import { ArticleCard } from './components/ArticleCard';
 import { TrialCard } from './components/TrialCard';
 import { DrugCard } from './components/DrugCard';
+import { RehabSection } from './components/RehabSection';
 import { AIInterpreterModal } from './components/AIInterpreterModal';
 import { DrugInterpreterModal } from './components/DrugInterpreterModal';
 import { TrialInterpreterModal } from './components/TrialInterpreterModal';
+import { FeedbackModal } from './components/FeedbackModal';
 import { SavedInquiries } from './components/SavedInquiries';
 import { Logo } from './components/Logo';
 import { searchArticles } from './services/pubmedService';
@@ -14,14 +17,14 @@ import { fetchDmdTrials } from './services/trialService';
 import { fetchDmdDrugs } from './services/fdaService';
 import { logout, getCurrentUser, getUserData, saveUserProfile } from './services/authService';
 import { UserProfile, Article, UserDatabaseEntry, ClinicalTrial, FDADrug } from './types';
-import { Calendar, Loader2, Sparkles, LayoutGrid, Settings, Bookmark, Microscope, Pill } from 'lucide-react';
+import { Calendar, Loader2, Sparkles, LayoutGrid, Settings, Bookmark, Microscope, Pill, Accessibility, MessageSquare } from 'lucide-react';
 
-type ViewState = 'feed' | 'trials' | 'drugs' | 'settings' | 'saved';
+type ViewState = 'rehab' | 'feed' | 'trials' | 'drugs' | 'settings' | 'saved';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserDatabaseEntry | null>(null);
-  const [currentView, setCurrentView] = useState<ViewState>('feed');
+  const [currentView, setCurrentView] = useState<ViewState>('rehab');
   
   const [articles, setArticles] = useState<Article[]>([]);
   const [trials, setTrials] = useState<ClinicalTrial[]>([]);
@@ -31,6 +34,7 @@ const App: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [selectedDrug, setSelectedDrug] = useState<FDADrug | null>(null);
   const [selectedTrial, setSelectedTrial] = useState<ClinicalTrial | null>(null);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [timeRange, setTimeRange] = useState(1); 
   const [initializing, setInitializing] = useState(true);
 
@@ -75,7 +79,7 @@ const App: React.FC = () => {
     setUser(u);
     const data = getUserData();
     setUserData(data);
-    setCurrentView(data?.profile ? 'feed' : 'settings');
+    setCurrentView(data?.profile ? 'rehab' : 'settings');
   };
 
   const handleLogout = async () => {
@@ -87,7 +91,7 @@ const App: React.FC = () => {
   const handleProfileSave = async (profile: UserProfile) => {
       await saveUserProfile(profile);
       setUserData(getUserData());
-      setCurrentView('feed');
+      setCurrentView('rehab');
   };
 
   if (initializing) {
@@ -110,17 +114,30 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Logo />
           <nav className="flex items-center bg-gray-100 p-1 rounded-lg overflow-x-auto scrollbar-hide max-w-[200px] sm:max-w-none">
+             <button onClick={() => setCurrentView('rehab')} className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'rehab' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'}`}><Accessibility className="w-4 h-4 mr-1 sm:mr-2" />康复</button>
              <button onClick={() => setCurrentView('feed')} className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'feed' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'}`}><LayoutGrid className="w-4 h-4 mr-1 sm:mr-2" />资讯</button>
              <button onClick={() => setCurrentView('trials')} className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'trials' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'}`}><Microscope className="w-4 h-4 mr-1 sm:mr-2" />试验</button>
              <button onClick={() => setCurrentView('drugs')} className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'drugs' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'}`}><Pill className="w-4 h-4 mr-1 sm:mr-2" />药物</button>
              <button onClick={() => setCurrentView('saved')} className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'saved' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'}`}><Bookmark className="w-4 h-4 mr-1 sm:mr-2" />已存</button>
              <button onClick={() => setCurrentView('settings')} className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'settings' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'}`}><Settings className="w-4 h-4 mr-1 sm:mr-2" />设置</button>
           </nav>
-          <button onClick={handleLogout} className="text-sm text-red-500 font-medium">退出</button>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsFeedbackOpen(true)}
+              className="flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 bg-brand-50 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              反馈
+            </button>
+            <button onClick={handleLogout} className="text-sm text-red-500 font-medium hover:text-red-600 transition-colors">退出</button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {currentView === 'rehab' && <RehabSection userData={userData} onUpdate={() => setUserData(getUserData())} />}
+        
         {currentView === 'feed' && (
           <div className="animate-in fade-in slide-in-from-bottom-4">
             <div className="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl p-6 md:p-8 text-white mb-8 shadow-lg relative overflow-hidden">
@@ -155,6 +172,13 @@ const App: React.FC = () => {
       {selectedArticle && <AIInterpreterModal article={selectedArticle} profile={userData.profile} onClose={() => setSelectedArticle(null)} />}
       {selectedDrug && <DrugInterpreterModal drug={selectedDrug} profile={userData.profile} onClose={() => setSelectedDrug(null)} />}
       {selectedTrial && <TrialInterpreterModal trial={selectedTrial} profile={userData.profile} onClose={() => setSelectedTrial(null)} />}
+      
+      {isFeedbackOpen && user && (
+        <FeedbackModal 
+          username={user} 
+          onClose={() => setIsFeedbackOpen(false)} 
+        />
+      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 export enum Region {
   ASIA = '亚洲 (Asia)',
   NORTH_AMERICA = '北美 (North America)',
@@ -85,8 +86,46 @@ export interface SavedInquiry {
   chatHistory: ChatMessage[];
 }
 
+export type FeedbackStatus = 'pending' | 'replied' | 'scheduled' | 'completed';
+
+export interface Feedback {
+  id: string;
+  username: string;
+  content: string;
+  images: string[]; // Base64 strings
+  status: FeedbackStatus;
+  reply?: string;
+  upvotes: number;
+  timestamp: string;
+  isBug: boolean;
+}
+
+export interface RehabExercise {
+  name: string;
+  count: number;
+}
+
+export interface RehabRecord {
+  id: string;
+  date: string; // ISO string
+  duration: number; // minutes
+  level: number; // 1, 2, 3
+  exercises: RehabExercise[];
+}
+
+export interface RehabStatus {
+  id: string;
+  date: string; // ISO string
+  hasJointPain: boolean;
+  jointPainDetails: string;
+  hasJointContracture: boolean;
+  jointContractureDetails: string;
+}
+
 export interface UserDatabaseEntry {
   username: string;
   profile: UserProfile | null;
   savedInquiries: SavedInquiry[];
+  rehabRecords: RehabRecord[];
+  rehabStatusHistory: RehabStatus[];
 }
